@@ -1,133 +1,146 @@
-'use client'
+import { useState } from 'react';
+import styles from './signup.module.css';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import styles from './signup.module.css'
+export default function SignUpForm() {
+  const [formData, setFormData] = useState({
+    email: '',
+    fullName: '',
+    dob: '',
+    password: '',
+    bioId: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-const formSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  fullName: z.string().min(2, { message: 'Name must be at least 2 characters' }),
-  dateOfBirth: z.date({
-    required_error: 'Date of birth is required',
-  }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
-  bioId: z.string().regex(/^\d{10}$/, { message: 'BioID must be a 10-digit number' }),
-})
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-export default function SignUpPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      fullName: '',
-      password: '',
-      bioId: '',
-    },
-  })
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    // Here you would typically send the form data to your backend
-    console.log(values)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsLoading(false)
-    router.push('/signup-success') // Redirect to a success page
-  }
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      window.location.href = '/login';
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className={styles.signupContainer}>
-      <div className={styles.signupForm}>
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <h2 className={styles.title}>Sign Up</h2>
-        <p className={styles.subtitle}>Register to create or sign petitions</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>Email</label>
-            <input
-              id="email"
-              type="email"
-              {...register('email')}
-              className={styles.input}
-              placeholder="your.email@example.com"
-            />
-            {errors.email && (
-              <p className={styles.errorMessage}>{errors.email.message}</p>
-            )}
+        
+        {error && (
+          <div className={styles.error}>
+            {error}
           </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="fullName" className={styles.label}>Full Name</label>
-            <input
-              id="fullName"
-              {...register('fullName')}
-              className={styles.input}
-              placeholder="John Doe"
-            />
-            {errors.fullName && (
-              <p className={styles.errorMessage}>{errors.fullName.message}</p>
-            )}
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="dateOfBirth" className={styles.label}>Date of Birth</label>
-            <input
-              id="dateOfBirth"
-              type="date"
-              {...register('dateOfBirth', { 
-                setValueAs: (v) => v ? new Date(v) : undefined 
-              })}
-              className={styles.input}
-            />
-            {errors.dateOfBirth && (
-              <p className={styles.errorMessage}>{errors.dateOfBirth.message}</p>
-            )}
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>Password</label>
-            <input
-              id="password"
-              type="password"
-              {...register('password')}
-              className={styles.input}
-            />
-            {errors.password && (
-              <p className={styles.errorMessage}>{errors.password.message}</p>
-            )}
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="bioId" className={styles.label}>Biometric ID (BioID)</label>
-            <input
-              id="bioId"
-              {...register('bioId')}
-              className={styles.input}
-              placeholder="1234567890"
-            />
-            {errors.bioId && (
-              <p className={styles.errorMessage}>{errors.bioId.message}</p>
-            )}
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`${styles.button} ${isLoading ? styles.loading : ''}`}
-          >
-            {isLoading ? 'Signing up...' : 'Sign Up'}
-          </button>
-        </form>
-        <p className={styles.loginLink}>
-          Already have an account?{' '}
-          <a href="/login">Log in</a>
-        </p>
-      </div>
-    </div>
-  )
-}
+        )}
 
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="email">
+            Email
+          </label>
+          <input
+            className={styles.input}
+            id="email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="fullName">
+            Full Name
+          </label>
+          <input
+            className={styles.input}
+            id="fullName"
+            type="text"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="dob">
+            Date of Birth
+          </label>
+          <input
+            className={styles.input}
+            id="dob"
+            type="date"
+            name="dob"
+            value={formData.dob}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="password">
+            Password
+          </label>
+          <input
+            className={styles.input}
+            id="password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="bioId">
+            Biometric ID
+          </label>
+          <input
+            className={styles.input}
+            id="bioId"
+            type="text"
+            name="bioId"
+            value={formData.bioId}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <button
+          className={styles.button}
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? 'Signing up...' : 'Sign Up'}
+        </button>
+      </form>
+    </div>
+  );
+}

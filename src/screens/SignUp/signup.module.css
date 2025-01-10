@@ -1,101 +1,78 @@
-.signupContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f0f2f5;
-  font-family: Arial, sans-serif;
+.container {
+  width: 100%;
+  max-width: 28rem;
+  margin: 2rem auto;
 }
 
-.signupForm {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
+.form {
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  border-radius: 0.5rem;
+  padding: 1.5rem 2rem 2rem;
+  margin-bottom: 1rem;
 }
 
 .title {
-  margin-bottom: 0.5rem;
-  color: #333;
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-.subtitle {
-  margin-bottom: 1.5rem;
-  color: #666;
+.error {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  color: rgb(185 28 28);
+  background-color: rgb(254 226 226);
+  border-radius: 0.25rem;
 }
 
 .formGroup {
   margin-bottom: 1rem;
 }
 
+.formGroup:last-of-type {
+  margin-bottom: 1.5rem;
+}
+
 .label {
   display: block;
+  color: rgb(55 65 81);
+  font-size: 0.875rem;
+  font-weight: 700;
   margin-bottom: 0.5rem;
-  color: #333;
 }
 
 .input {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  color: rgb(55 65 81);
+  line-height: 1.5;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .input:focus {
   outline: none;
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-}
-
-.errorMessage {
-  color: #d32f2f;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
 
 .button {
   width: 100%;
-  padding: 0.75rem;
-  background-color: #4a90e2;
+  background-color: rgb(59 130 246);
   color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
   transition: background-color 0.2s;
 }
 
 .button:hover {
-  background-color: #3a7bc8;
+  background-color: rgb(29 78 216);
 }
 
 .button:disabled {
-  background-color: #ccc;
+  opacity: 0.7;
   cursor: not-allowed;
 }
-
-.button.loading {
-  opacity: 0.7;
-}
-
-.loginLink {
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.loginLink a {
-  color: #4a90e2;
-  text-decoration: none;
-}
-
-.loginLink a:hover {
-  text-decoration: underline;
-}
-
