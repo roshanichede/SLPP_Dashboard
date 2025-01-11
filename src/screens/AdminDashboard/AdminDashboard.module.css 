@@ -1,0 +1,247 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgb(229 231 235);
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: rgb(31 41 55);
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userEmail {
+  color: rgb(75 85 99);
+}
+
+.logoutButton {
+  padding: 0.5rem 1rem;
+  color: rgb(239 68 68);
+  border: 1px solid rgb(239 68 68);
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: rgb(239 68 68);
+  color: white;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.thresholdSection {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+  margin-bottom: 1rem;
+}
+
+.thresholdForm {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.thresholdInput {
+  padding: 0.5rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  width: 150px;
+}
+
+.primaryButton {
+  padding: 0.5rem 1rem;
+  background-color: rgb(59 130 246);
+  color: white;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.primaryButton:hover {
+  background-color: rgb(29 78 216);
+}
+
+.secondaryButton {
+  padding: 0.5rem 1rem;
+  background-color: white;
+  color: rgb(75 85 99);
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.secondaryButton:hover {
+  background-color: rgb(243 244 246);
+}
+
+.petitionsSection {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.petitionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.filterSelect {
+  padding: 0.5rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  background-color: white;
+}
+
+.petitionsList {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.petitionCard {
+  padding: 1.5rem;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 0.5rem;
+  background-color: white;
+}
+
+.petitionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+  margin-bottom: 0.5rem;
+}
+
+.petitionText {
+  color: rgb(75 85 99);
+  margin-bottom: 1rem;
+}
+
+.petitionMeta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.signatures {
+  color: rgb(75 85 99);
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+.status.open {
+  background-color: rgb(219 234 254);
+  color: rgb(29 78 216);
+}
+
+.status.closed {
+  background-color: rgb(229 231 235);
+  color: rgb(75 85 99);
+}
+
+.responseButton {
+  padding: 0.5rem 1rem;
+  background-color: rgb(59 130 246);
+  color: white;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.responseButton:hover {
+  background-color: rgb(29 78 216);
+}
+
+.responseBox {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgb(243 244 246);
+  border-radius: 0.375rem;
+}
+
+.responseBox strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: rgb(31 41 55);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+  margin-bottom: 1.5rem;
+}
+
+.responseInput {
+  width: 100%;
+  min-height: 150px;
+  padding: 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  margin-bottom: 1.5rem;
+  resize: vertical;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}

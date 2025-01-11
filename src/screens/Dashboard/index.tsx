@@ -1,194 +1,172 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { usePetitionStore, Petition } from '../../stores/usePetitionStore';
 import styles from './Dashboard.module.css';
+import { useRouter } from 'next/router';
 
-export default function PetitionerDashboard() {
-  const [petitions, setPetitions] = useState([]);
+interface NewPetition {
+  title: string;
+  content: string;
+}
+
+export default function Dashboard() {
+  const router = useRouter();
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
+  const { petitions, isLoading, error, fetchPetitions, createPetition, signPetition } = usePetitionStore();
+  
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    content: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [signedPetitions, setSignedPetitions] = useState(new Set());
+  const [newPetition, setNewPetition] = useState<NewPetition>({ title: '', content: '' });
 
   useEffect(() => {
-    fetchPetitions();
-    fetchSignedPetitions();
+    // Check authentication on component mount
+    if (!user) {
+      router.push('/login');
+    } else {
+      fetchPetitions();
+    }
+  }, [user, router, fetchPetitions]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/petitions/list');
+      const data = await response.json();
+      console.log('API Response:', data);
+    };
+    fetchData();
   }, []);
 
-  const fetchPetitions = async () => {
-    try {
-      const response = await fetch('/api/petitions');
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch petitions');
-      }
-      
-      setPetitions(data.petitions);
-    } catch (err) {
-      setError('Failed to load petitions');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSignedPetitions = async () => {
-    try {
-      const response = await fetch('/api/petitions/signed');
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-      
-      setSignedPetitions(new Set(data.signedPetitions));
-    } catch (err) {
-      console.error('Error fetching signed petitions:', err);
-    }
-  };
-
-  const handleCreatePetition = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    try {
-      const response = await fetch('/api/petitions/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create petition');
-      }
-
-      // Reset form and refresh petitions
-      setFormData({ title: '', content: '' });
-      setShowCreateForm(false);
-      fetchPetitions();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleSignPetition = async (petitionId) => {
-    try {
-      const response = await fetch(`/api/petitions/${petitionId}/sign`, {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign petition');
-      }
-
-      // Update signed petitions and refresh list
-      setSignedPetitions(prev => new Set([...prev, petitionId]));
-      fetchPetitions();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  if (loading) {
-    return <div className={styles.container}>Loading...</div>;
+  // If no user, render nothing while redirecting
+  if (!user) {
+    return null;
   }
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createPetition(newPetition.title, newPetition.content);
+    setNewPetition({ title: '', content: '' });
+    setShowCreateForm(false);
+  };
+
+  const handleSign = async (petitionId: string) => {
+    await signPetition(petitionId);
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+      <header className={styles.header}>
         <h1 className={styles.title}>Petitioner Dashboard</h1>
+        <div>
+          <span className={styles.userEmail}>{user.email}</span>
+          <button 
+            onClick={logout}
+            className={styles.logoutButton}
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {error && (
+        <div className={styles.error}>{error}</div>
+      )}
+
+      <div className={styles.actions}>
         <button 
-          onClick={() => setShowCreateForm(!showCreateForm)}
+          onClick={() => setShowCreateForm(true)}
           className={styles.button}
         >
-          {showCreateForm ? 'Cancel' : 'Create New Petition'}
+          Create New Petition
         </button>
       </div>
 
-      {error && (
-        <div className={styles.error}>
-          {error}
-        </div>
-      )}
-
       {showCreateForm && (
-        <form onSubmit={handleCreatePetition} className={styles.form}>
+        <form onSubmit={handleCreateSubmit} className={styles.form}>
+          <h2 className={styles.formTitle}>Create New Petition</h2>
+          
           <div className={styles.formGroup}>
             <label className={styles.label}>
-              Petition Title
+              Title
+              <input
+                type="text"
+                value={newPetition.title}
+                onChange={e => setNewPetition(prev => ({ ...prev, title: e.target.value }))}
+                className={styles.input}
+                required
+              />
             </label>
-            <input
-              className={styles.input}
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
-              required
-            />
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>
-              Petition Content
+              Content
+              <textarea
+                value={newPetition.content}
+                onChange={e => setNewPetition(prev => ({ ...prev, content: e.target.value }))}
+                className={styles.textarea}
+                required
+              />
             </label>
-            <textarea
-              className={styles.textarea}
-              value={formData.content}
-              onChange={(e) => setFormData({...formData, content: e.target.value})}
-              required
-            />
           </div>
 
           <div className={styles.buttonGroup}>
-            <button type="submit" className={styles.button}>
-              Submit Petition
+            <button 
+              type="button" 
+              onClick={() => setShowCreateForm(false)}
+              className={styles.secondaryButton}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              className={styles.button}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating...' : 'Create Petition'}
             </button>
           </div>
         </form>
       )}
 
       <div className={styles.petitionsList}>
-        {petitions.map((petition) => (
-          <div key={petition.id} className={styles.petitionCard}>
-            <h2 className={styles.petitionTitle}>{petition.title}</h2>
-            <p className={styles.petitionContent}>{petition.content}</p>
-            
-            <div className={styles.metaInfo}>
-              <span>Status: {petition.status}</span>
-              <span>Signatures: {petition.signatures}</span>
-            </div>
-
-            {petition.status === 'open' && !signedPetitions.has(petition.id) && (
-              <button
-                onClick={() => handleSignPetition(petition.id)}
-                className={styles.secondaryButton}
-              >
-                Sign Petition
-              </button>
-            )}
-
-            {signedPetitions.has(petition.id) && (
-              <span className={styles.signedBadge}>
-                ✓ You've signed this petition
-              </span>
-            )}
-
-            {petition.response && (
-              <div className={styles.response}>
-                <h3>Committee Response:</h3>
-                <p>{petition.response}</p>
+        {isLoading ? (
+          <div>Loading petitions...</div>
+        ) : (
+          petitions.map((petition: Petition) => (
+            <div key={petition.id} className={styles.petitionCard}>
+              <h3 className={styles.petitionTitle}>{petition.title}</h3>
+              <p className={styles.petitionContent}>{petition.content}</p>
+              
+              <div className={styles.metaInfo}>
+                <span>Status: {petition.status}</span>
+                <span>Signatures: {petition.signature_count}</span>
+                <span>Created by: {petition.petitioner?.full_name || 'Unknown'}</span>
               </div>
-            )}
-          </div>
-        ))}
+
+              {petition.status === 'open' && petition.petitioner?.email !== user?.email && (
+  <button
+    onClick={() => handleSign(petition.id)}
+    className={styles.button}
+    disabled={isLoading}
+  >
+    Sign Petition
+  </button>
+)}
+
+              {petition.response && (
+                <div className={styles.response}>
+                  <strong>Official Response:</strong>
+                  <p>{petition.response}</p>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

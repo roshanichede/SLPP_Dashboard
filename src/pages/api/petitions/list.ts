@@ -1,3 +1,4 @@
+// pages/api/petitions/list.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
@@ -15,16 +16,19 @@ export default async function handler(
   }
 
   try {
-    const { data: petitions, error } = await supabase
-      .from('petitions')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+    .from('petitions')
+    .select(`
+      *,
+      creator:users(email, full_name)
+    `);
+
 
     if (error) throw error;
 
-    return res.status(200).json({ petitions });
+    return res.status(200).json({ petitions: data });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error fetching petitions:', error);
     return res.status(500).json({ error: 'Failed to fetch petitions' });
   }
 }

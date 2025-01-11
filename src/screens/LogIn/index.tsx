@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
+import { useRouter } from 'next/router';
 import styles from './LogIn.module.css';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export default function LoginForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -9,14 +12,14 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -31,15 +34,16 @@ export default function LoginForm() {
       });
 
       const data = await response.json();
+      console.log('Login response:', data); // Debug log
 
       if (!response.ok) {
         throw new Error(data.error || 'Something went wrong');
       }
-
-      // Redirect to dashboard on success
-      window.location.href = '/dashboard';
+      
+      router.push('/dashboard');
     } catch (err) {
-      setError(err.message);
+      console.error('Login error:', err); // Debug log
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
