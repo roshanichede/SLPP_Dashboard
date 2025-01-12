@@ -16,7 +16,7 @@ export default function HomePage() {
       <main className={styles.main}>
         <section className={styles.hero}>
           <h2>Create Change in Shangri-La</h2>
-          <p>Join thousands of citizens who are actively shaping our nation's future through digital petitions.</p>
+          <p>Join thousands of citizens who are actively shaping our nation&apos;s future through digital petitions.</p>
           
           <div className={styles.accountTypes}>
             <div className={styles.accountCard}>

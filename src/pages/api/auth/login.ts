@@ -41,7 +41,7 @@ export default async function handler(
     }
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    const { ...userWithoutPassword } = user;
 
     // Set session cookie
     res.setHeader('Set-Cookie', `session=${user.id}; Path=/; HttpOnly; SameSite=Strict`);
