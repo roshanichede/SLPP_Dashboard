@@ -9,10 +9,11 @@ export interface Petition {
   status: 'open' | 'closed';
   signature_count: number;
   response?: string;
-  petitioner: {
+  creator: {
     email: string;
     full_name: string;
   };
+  signatures: string[];
 }
 
 interface PetitionState {
@@ -21,7 +22,7 @@ interface PetitionState {
   error: string | null;
   fetchPetitions: () => Promise<void>;
   createPetition: (title: string, content: string) => Promise<void>;
-  signPetition: (petitionId: string) => Promise<void>;
+  signPetition: (petitionId: string, signerId: string) => Promise<void>;
 }
 
 export const usePetitionStore = create<PetitionState>()((set, get) => ({
@@ -64,7 +65,7 @@ export const usePetitionStore = create<PetitionState>()((set, get) => ({
         },
         body: JSON.stringify({ title, content })
       });
-      const data = await response.json();
+      // const data = await response.json();
       if (!response.ok) {
         throw new Error('Failed to create petition');
       }
@@ -77,7 +78,7 @@ export const usePetitionStore = create<PetitionState>()((set, get) => ({
     }
   },
 
-  signPetition: async (petitionId: string) => {
+  signPetition: async (petitionId: string, signerId: string) => {
     set({ isLoading: true, error: null });
     try {
       const user = useAuthStore.getState().user as User;
@@ -87,11 +88,11 @@ export const usePetitionStore = create<PetitionState>()((set, get) => ({
           'Content-Type': 'application/json',
           'Authorization': JSON.stringify(user)
         },
-        body: JSON.stringify({ petitionId })
+        body: JSON.stringify({ petitionId, signerId })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to sign petition');
+        throw new Error('Failed to sign petition, maybe you already signed it?');
       }
 
       await get().fetchPetitions();

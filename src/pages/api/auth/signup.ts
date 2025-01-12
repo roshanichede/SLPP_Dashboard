@@ -98,7 +98,7 @@ export default async function handler(
     }
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = newUser;
+    const { ...userWithoutPassword } = newUser;
     
     return res.status(201).json({
       message: 'User registered successfully',

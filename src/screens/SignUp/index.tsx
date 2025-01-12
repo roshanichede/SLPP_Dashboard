@@ -1,4 +1,5 @@
 import { useState, ChangeEvent } from 'react';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import styles from './signup.module.css';
 
 export default function SignUpForm() {
@@ -6,11 +7,12 @@ export default function SignUpForm() {
     email: '',
     fullName: '',
     dob: '',
-    password: '',
-    bioId: ''
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [QRCodePopup, setQRCodePopup] = useState(false);
+  const [bioID, setBioID] = useState('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -48,7 +50,7 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={() => setQRCodePopup(false)}>
       <form onSubmit={handleSubmit} className={styles.form}>
         <h2 className={styles.title}>Sign Up</h2>
         
@@ -127,16 +129,40 @@ export default function SignUpForm() {
             id="bioId"
             type="text"
             name="bioId"
-            value={formData.bioId}
-            onChange={handleChange}
+            value={bioID}
+            onChange={(e) => setBioID(e.target.value)}
             required
           />
         </div>
+
+        <button className={styles.button}>
+          <span
+            onClick={(e) => {
+              e.stopPropagation()
+              setQRCodePopup(true)
+            }}>
+              Scan Bio ID</span>
+        </button>
+
+
+        {
+          QRCodePopup &&
+            <div className={styles.modal}>
+              {/* <span className={styles.closeIcon} onClick={() => setQRCodePopup(false)}>X</span> */}
+              <div className={styles.modalContent}>
+                <Scanner onScan={(result) => {
+                  setBioID(result[0].rawValue);
+                  setQRCodePopup(false);
+                }} />
+              </div>
+            </div>
+        }
 
         <button
           className={styles.button}
           type="submit"
           disabled={loading}
+          style={{ marginTop: '1rem' }}
         >
           {loading ? 'Signing up...' : 'Sign Up'}
         </button>

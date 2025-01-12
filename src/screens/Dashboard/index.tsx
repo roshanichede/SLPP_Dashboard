@@ -14,27 +14,19 @@ export default function Dashboard() {
   const user = useAuthStore(state => state.user);
   const logout = useAuthStore(state => state.logout);
   const { petitions, isLoading, error, fetchPetitions, createPetition, signPetition } = usePetitionStore();
-  
+
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPetition, setNewPetition] = useState<NewPetition>({ title: '', content: '' });
 
   useEffect(() => {
-    // Check authentication on component mount
-    if (!user) {
-      router.push('/login');
-    } else {
-      fetchPetitions();
-    }
-  }, [user, router, fetchPetitions]);
+    fetchPetitions();
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch('/api/petitions/list');
-      const data = await response.json();
-      console.log('API Response:', data);
-    };
-    fetchData();
-  }, []);
+    if (user === null) {
+      router.push('/login');
+    }
+  }, [user])
 
   // If no user, render nothing while redirecting
   if (!user) {
@@ -49,7 +41,7 @@ export default function Dashboard() {
   };
 
   const handleSign = async (petitionId: string) => {
-    await signPetition(petitionId);
+    await signPetition(petitionId, user.id);
   };
 
   const handleLogout = () => {
@@ -63,8 +55,8 @@ export default function Dashboard() {
         <h1 className={styles.title}>Petitioner Dashboard</h1>
         <div>
           <span className={styles.userEmail}>{user.email}</span>
-          <button 
-            onClick={logout}
+          <button
+            onClick={handleLogout}
             className={styles.logoutButton}
           >
             Logout
@@ -77,7 +69,7 @@ export default function Dashboard() {
       )}
 
       <div className={styles.actions}>
-        <button 
+        <button
           onClick={() => setShowCreateForm(true)}
           className={styles.button}
         >
@@ -88,7 +80,7 @@ export default function Dashboard() {
       {showCreateForm && (
         <form onSubmit={handleCreateSubmit} className={styles.form}>
           <h2 className={styles.formTitle}>Create New Petition</h2>
-          
+
           <div className={styles.formGroup}>
             <label className={styles.label}>
               Title
@@ -115,14 +107,14 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.buttonGroup}>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setShowCreateForm(false)}
               className={styles.secondaryButton}
             >
               Cancel
             </button>
-            <button 
+            <button
               type="submit"
               className={styles.button}
               disabled={isLoading}
@@ -137,26 +129,27 @@ export default function Dashboard() {
         {isLoading ? (
           <div>Loading petitions...</div>
         ) : (
-          petitions.map((petition: Petition) => (
+          petitions.map((petition: Petition) => {
+            return (
             <div key={petition.id} className={styles.petitionCard}>
               <h3 className={styles.petitionTitle}>{petition.title}</h3>
               <p className={styles.petitionContent}>{petition.content}</p>
-              
+
               <div className={styles.metaInfo}>
                 <span>Status: {petition.status}</span>
                 <span>Signatures: {petition.signature_count}</span>
-                <span>Created by: {petition.petitioner?.full_name || 'Unknown'}</span>
+                <span>Created by: {petition.creator?.full_name || 'Unknown'}</span>
               </div>
 
-              {petition.status === 'open' && petition.petitioner?.email !== user?.email && (
-  <button
-    onClick={() => handleSign(petition.id)}
-    className={styles.button}
-    disabled={isLoading}
-  >
-    Sign Petition
-  </button>
-)}
+              {petition.status === 'open' && petition.creator?.email !== user?.email && (
+                <button
+                  onClick={() => handleSign(petition.id)}
+                  className={styles.button}
+                  disabled={isLoading || petition?.signatures?.includes(user.id)}
+                >
+                  {petition?.signatures?.includes(user.id) ? 'Signed' : 'Sign Petition'}
+                </button>
+              )}
 
               {petition.response && (
                 <div className={styles.response}>
@@ -165,7 +158,8 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>

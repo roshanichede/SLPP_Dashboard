@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import styles from './LogIn.module.css';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -12,6 +12,18 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const { login, user } = useAuthStore();
+
+  useEffect(() => {
+    if (user) {
+      if (user?.role === 'admin') {
+        router.push('/committee-dashboard');
+      } else {
+        router.push('/dashboard');
+      }
+    }
+  }, [ user ])
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -24,29 +36,19 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
 
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      console.log('Login response:', data); // Debug log
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong');
+    login(formData.email, formData.password).then(user => {
+      if (!user) {
+        alert('Something went wrong');
+        return;
       }
-      
+
       router.push('/dashboard');
-    } catch (err) {
-      console.error('Login error:', err); // Debug log
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
+    }).catch(() => {
+      console.error('Login error'); // Debug log
+      setError('An unknown error occurred');
+    }).finally(() => {
       setLoading(false);
-    }
+    })
   };
 
   return (

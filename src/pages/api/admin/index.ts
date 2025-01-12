@@ -1,7 +1,6 @@
 // pages/api/admin/index.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,

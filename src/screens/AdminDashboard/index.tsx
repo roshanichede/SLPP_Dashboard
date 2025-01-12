@@ -1,8 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '@/stores/useAuthStore';
-import { usePetitionStore, Petition } from '@/stores/usePetitionStore';
-import styles from './CommitteeDashboard.module.css';
 import { useRouter } from 'next/router';
+import { toast } from 'react-hot-toast';
+
+import { useAuthStore } from '@/stores/useAuthStore';
+import { usePetitionStore } from '@/stores/usePetitionStore';
+
+import styles from './AdminDashboard.module.css';
+
+const thresholdCount = typeof window !== 'undefined' ? (localStorage.getItem('signatureThreshold') || 0) : 0 || 10;
 
 export default function CommitteeDashboard() {
   const router = useRouter();
@@ -10,42 +16,38 @@ export default function CommitteeDashboard() {
   const logout = useAuthStore(state => state.logout);
   const { petitions, fetchPetitions } = usePetitionStore();
 
-  const [thresholdValue, setThresholdValue] = useState(1000);
-  const [selectedPetition, setSelectedPetition] = useState(null);
+  const [thresholdValue, setThresholdValue] = useState(thresholdCount);
+  const [selectedPetition, setSelectedPetition] = useState<string | null>(null);
   const [response, setResponse] = useState('');
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'responded'
 
   useEffect(() => {
-    if (!user || user.email !== 'admin@petition.parliament.sr') {
-      router.push('/login');
-      return;
-    }
     fetchPetitions();
-  }, [user, router, fetchPetitions]);
+  }, []);
+
+  useEffect(() => {
+    if (user === null) {
+      router.push('/login');
+    }
+  }, [ user ])
 
   const handleUpdateThreshold = async () => {
-    try {
-      await fetch('/api/admin/threshold', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ threshold: thresholdValue })
-      });
-    } catch (error) {
-      console.error('Failed to update threshold:', error);
-    }
+    localStorage.setItem('signatureThreshold', thresholdValue.toString());
+    toast.success('Signature threshold updated successfully');
   };
 
-  const handleSubmitResponse = async (e) => {
+  const handleSubmitResponse = async (e: any) => {
     e.preventDefault();
     if (!selectedPetition || !response) return;
 
     try {
       await fetch('/api/admin/respond', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           petitionId: selectedPetition,
-          response: response
+          response: response,
+          userRole: user?.role
         })
       });
       setSelectedPetition(null);
@@ -59,7 +61,7 @@ export default function CommitteeDashboard() {
   const filteredPetitions = petitions.filter(petition => {
     switch (filter) {
       case 'pending':
-        return petition.status === 'open' && petition.signature_count >= thresholdValue;
+        return petition.status === 'open' && petition.signature_count >= Number(thresholdValue);
       case 'responded':
         return petition.status === 'closed';
       default:
@@ -126,13 +128,18 @@ export default function CommitteeDashboard() {
                   <span className={styles.signatures}>
                     Signatures: {petition.signature_count}
                   </span>
+
+                  <span className={styles.signatures}>
+                    Created By: {petition.creator.full_name}
+                  </span>
+
                   <span className={`${styles.status} ${styles[petition.status]}`}>
                     Status: {petition.status}
                   </span>
                 </div>
                 
                 {petition.status === 'open' && 
-                 petition.signature_count >= thresholdValue && (
+                 petition.signature_count >= Number(thresholdValue) && (
                   <button
                     onClick={() => setSelectedPetition(petition.id)}
                     className={styles.responseButton}
