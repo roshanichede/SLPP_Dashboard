@@ -21,7 +21,7 @@ interface SignUpBody {
   fullName: string;
   dob: string;
   password: string;
-  bioId: string;
+  bioID: string;
 }
 
 export default async function handler(
@@ -33,10 +33,10 @@ export default async function handler(
   }
 
   try {
-    const { email, fullName, dob, password, bioId }: SignUpBody = req.body;
+    const { email, fullName, dob, password, bioID }: SignUpBody = req.body;
 
     // Input validation
-    if (!email || !fullName || !dob || !password || !bioId) {
+    if (!email || !fullName || !dob || !password || !bioID) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -47,7 +47,7 @@ export default async function handler(
     }
 
     // Validate BioID
-    if (!validBioIds.includes(bioId)) {
+    if (!validBioIds.includes(bioID)) {
       return res.status(400).json({ error: 'Invalid Biometric ID' });
     }
 
@@ -66,7 +66,7 @@ export default async function handler(
     const { data: existingBioId } = await supabase
       .from('users')
       .select('bio_id')
-      .eq('bio_id', bioId)
+      .eq('bio_id', bioID)
       .single();
 
     if (existingBioId) {
@@ -85,7 +85,7 @@ export default async function handler(
           full_name: fullName,
           date_of_birth: dob,
           password: hashedPassword,
-          bio_id: bioId,
+          bio_id: bioID,
           role: 'petitioner'
         }
       ])

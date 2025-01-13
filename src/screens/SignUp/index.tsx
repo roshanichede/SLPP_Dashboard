@@ -32,7 +32,7 @@ export default function SignUpForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({...formData, bioID}),
       });
 
       const data = await response.json();
